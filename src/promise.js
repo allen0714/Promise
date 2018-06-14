@@ -23,6 +23,29 @@ function Promise (resolver) {
  * 没有错误执行doResolve 有错误执行doReject
  */
 function safelyResolveThen (self, then) {
+  let called = false;
+  try {
+    then(function(value){
+      if(called){
+        return;
+      }
+      called = true;
+      doResolve(self,value);
+    },
+      function(err){
+        if(called) {
+          return;
+        }
+        called = true;
+        doReject(self, err);
+      })
+  } catch (error) {
+    if(called){
+      return;
+    }
+    called = true;
+    doReject(self, error);
+  }
 
 }
 
